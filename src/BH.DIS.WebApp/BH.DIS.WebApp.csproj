@@ -29,7 +29,6 @@
     </PackageReference>
     <PackageReference Include="Serilog" Version="2.11.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
-	<PackageReference Include="BH.DIS;" Version="1.*" />
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.8.1" />
   </ItemGroup>
 
@@ -56,6 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BH.DIS.Configuration\BH.DIS.csproj" />
     <ProjectReference Include="..\BH.DIS.Core\BH.DIS.Core.csproj" />
     <ProjectReference Include="..\BH.DIS.Management.ServiceBus\BH.DIS.Management.ServiceBus.csproj" />
     <ProjectReference Include="..\BH.DIS.Manager\BH.DIS.Manager.csproj" />

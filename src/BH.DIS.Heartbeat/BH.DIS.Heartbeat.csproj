@@ -15,9 +15,9 @@
 		<PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.1.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
 		<PackageReference Include="Serilog.Sinks.ILogger" Version="1.0.3" />
-		<PackageReference Include="BH.DIS" Version="1.*" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\BH.DIS.Configuration\BH.DIS.csproj" />
 		<ProjectReference Include="..\BH.DIS.Core\BH.DIS.Core.csproj" />
 		<ProjectReference Include="..\BH.DIS.MessageStore\BH.DIS.MessageStore.csproj" />
 		<ProjectReference Include="..\BH.DIS.SDK\BH.DIS.SDK.csproj" />

@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\deploy\local.ps1 = ..\deploy\local.ps1
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BH.DIS.Core", "BH.DIS.Core\BH.DIS.Core.csproj", "{58EC62B8-4E2C-4CB3-819B-85445998A2AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{24B49904-440B-49F3-8F3A-02792A31EBE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24B49904-440B-49F3-8F3A-02792A31EBE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24B49904-440B-49F3-8F3A-02792A31EBE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58EC62B8-4E2C-4CB3-819B-85445998A2AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58EC62B8-4E2C-4CB3-819B-85445998A2AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58EC62B8-4E2C-4CB3-819B-85445998A2AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58EC62B8-4E2C-4CB3-819B-85445998A2AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
