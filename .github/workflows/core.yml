@@ -1,0 +1,19 @@
+on:
+  push:
+    branches:
+      - main
+      - development
+    paths-ignore:
+      - src/BH.DIS.WebApp/*
+
+env:
+  BuildConfiguration: release
+
+jobs:
+  Build_Application:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build & Test
+        uses: "./.github/template/build-core-template"

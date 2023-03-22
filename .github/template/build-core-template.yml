@@ -1,0 +1,73 @@
+jobs:
+  Build:
+    name: Build Application
+    steps:
+      - name: Use .NET Core SDK 6.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.x
+      - name: dotnet restore
+        run: |
+          dotnet restore src/**/BH.DIS.Core.csproj 
+          dotnet restore src/**/BH.DIS.EventPublisher.csproj 
+          dotnet restore src/**/BH.DIS.Manager.csproj 
+          dotnet restore src/**/BH.DIS.MessageStore.csproj 
+          dotnet restore src/**/BH.DIS.Resolver.csproj         
+          dotnet restore src/**/BH.DIS.SDK.csproj 
+          dotnet restore src/**/BH.DIS.ServiceBus.csproj 
+          dotnet restore src/**/BH.DIS.CosmosSubscriber.csproj 
+          dotnet restore src/**/BH.DIS.Management.ServiceBus.csproj 
+          dotnet restore src/**/BH.DIS.Heartbeat.csproj
+      - name: dotnet build
+        run: |
+          dotnet build src/**/BH.DIS.Core.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.EventPublisher.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.Manager.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.MessageStore.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.Resolver.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.SDK.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.ServiceBus.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.CosmosSubscriber.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.Management.ServiceBus.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.Heartbeat.csproj --no-restore --configuration ${{ env.BuildConfiguration }}
+      - name: dotnet test (all in /tests)
+        run: dotnet test tests/**/*.csproj --no-build --configuration ${{ env.BuildConfiguration }}
+  Publish:
+    name: Publish artifacts
+    needs:
+      - Build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use .NET Core SDK 6.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.x
+      - name: dotnet restore (resolver/eventpublisher/Cosmos/Heartbeat)
+        run: |
+          dotnet restore src/**/BH.DIS.Resolver.csproj 
+          dotnet restore src/**/BH.DIS.EventPublisher.csproj 
+          dotnet restore src/**/BH.DIS.CosmosSubscriber.csproj         
+          dotnet restore src/**/BH.DIS.Heartbeat.csproj
+      - name: dotnet build (Core services)
+        run: |
+          dotnet build src/**/BH.DIS.Resolver.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.EventPublisher.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.CosmosSubscriber.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.Heartbeat.csproj --no-restore --configuration ${{ env.BuildConfiguration }}
+      - name: dotnet publish (resolver/eventpublisher/Cosmos/Heartbeat)
+        run: |
+          dotnet publish src/**/BH.DIS.Resolver.csproj --no-restore --configuration ${{ env.BuildConfiguration }} --output ${{ github.workspace }}/publish /p:InformationalVersion=${{ env.FullSemVer }} 
+          dotnet publish src/**/BH.DIS.EventPublisher.csproj --no-restore --configuration ${{ env.BuildConfiguration }} --output ${{ github.workspace }}/publish /p:InformationalVersion=${{ env.FullSemVer }} 
+          dotnet publish src/**/BH.DIS.CosmosSubscriber.csproj --no-restore --configuration ${{ env.BuildConfiguration }} --output ${{ github.workspace }}/publish /p:InformationalVersion=${{ env.FullSemVer }} 
+          dotnet publish src/**/BH.DIS.Heartbeat.csproj --no-restore --configuration ${{ env.BuildConfiguration }} --output ${{ github.workspace }}/publish /p:InformationalVersion=${{ env.FullSemVer }}
+      - name: dotnet publish (BH.DIS.Core.dll for resource deployment)
+        run: dotnet publish src/**/BH.DIS.Core.csproj --configuration ${{ env.BuildConfiguration }} --output ${{ github.workspace }}/deploy --framework netstandard2.0
+      - name: Copy deployment files
+        run: |
+          Copy 'deploy/**/*
+          ' '${{ github.workspace }}/deploy'
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ github.workspace }}
+          name: drop
