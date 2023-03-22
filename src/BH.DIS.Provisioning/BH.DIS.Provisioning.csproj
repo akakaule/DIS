@@ -9,7 +9,7 @@
 
   <ItemGroup>
 	<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.8.1" />
-	<PackageReference Include="BH.DIS;" Version="1.*" />
+	<ProjectReference Include="..\BH.DIS.Configuration\BH.DIS.csproj" />
     <ProjectReference Include="..\BH.DIS.Core\BH.DIS.Core.csproj" />
     <ProjectReference Include="..\BH.DIS.Management.ServiceBus\BH.DIS.Management.ServiceBus.csproj" />
   </ItemGroup>

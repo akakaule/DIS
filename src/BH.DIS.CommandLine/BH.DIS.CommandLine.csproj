@@ -10,12 +10,12 @@
 
 	<ItemGroup>
         <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.10.0" />
-        <PackageReference Include="BH.DIS;" Version="1.*" />
 		<PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.0.1" />
 		<PackageReference Include="Spectre.Console" Version="0.45.0" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\BH.DIS.Configuration\BH.DIS.csproj" />
 	  <ProjectReference Include="..\BH.DIS.MessageStore\BH.DIS.MessageStore.csproj" />
 	  <ProjectReference Include="..\BH.DIS.ServiceBus\BH.DIS.ServiceBus.csproj" />
 	</ItemGroup>

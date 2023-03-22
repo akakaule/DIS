@@ -3,7 +3,6 @@ using BH.DIS.Core.Messages;
 using BH.DIS.MessageStore;
 using BH.DIS.MessageStore.States;
 using McMaster.Extensions.CommandLineUtils;
-
 using Azure.Messaging.ServiceBus.Administration;
 using BH.DIS.CommandLine.Models;
 using Spectre.Console;
