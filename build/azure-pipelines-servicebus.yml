@@ -1,0 +1,79 @@
+trigger:
+  batch: true
+  branches: 
+    include:
+    - main
+    - feature/*
+  tags:
+    include:
+    - '*'    
+
+parameters:
+- name: deploySandbox
+  displayName: Deploy to Sandbox
+  type: boolean
+  default: false
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  BuildConfiguration: 'release'
+
+stages:
+  - stage: Publish_files
+    displayName: Publish files
+    jobs:
+      - template: build-servicebus-template.yml
+ 
+  - stage: Provision_Dev
+    displayName: Provision Dev
+    dependsOn: Publish_files
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/main'))
+    variables: 
+      - group: DIS-Dev
+    jobs: 
+      - template: deploy-servicebus-template.yml
+        parameters:
+          environment: dev
+          serviceConnectionName: 'DIS'
+          deployRoleAssignments: false
+  
+  # - stage: Provision_test
+  #   displayName: Provision Test
+  #   dependsOn: Publish_files
+  #   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #   variables: 
+  #     - group: Test
+  #   jobs: 
+  #     - template: deploy-servicebus-template.yml
+  #       parameters:
+  #         environment: test
+  #         serviceConnectionName: 'Test (T) DIS'
+  #         deployRoleAssignments: true
+
+  # - stage: Provision_UAT
+  #   displayName: Provision UAT
+  #   dependsOn: Provision_test
+  #   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #   variables: 
+  #     - group: UAT
+  #   jobs: 
+  #     - template: deploy-servicebus-template.yml
+  #       parameters:
+  #         environment: uat
+  #         serviceConnectionName: 'UAT (U) DIS'
+  #         deployRoleAssignments: true
+   
+  # - stage: Provision_production
+  #   displayName: Provision Prod
+  #   dependsOn: Provision_staging
+  #   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  #   variables: 
+  #     - group: Production
+  #   jobs: 
+  #     - template: deploy-servicebus-template.yml
+  #       parameters:
+  #         environment: prod
+  #         serviceConnectionName: 'Production (P) DIS'
+  #         deployRoleAssignments: false

@@ -1,0 +1,22 @@
+trigger:
+  batch: true
+  branches: 
+    include:
+    - main
+    - feature/*
+  tags:
+    include:
+    - '*'    
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- name: BuildConfiguration
+  value: 'release'
+
+stages:
+  - stage: Build_Application
+    displayName: Build & Publish
+    jobs:
+    - template: build-config-template.yml
