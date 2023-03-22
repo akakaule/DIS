@@ -1,1 +1,2 @@
-# DIS
+DIS is a free messaging platform based on Azure Service Bus providing enhanced features for error handling and monitoring with a rich web UI.
+Client libraries in .NET provide easy access to platform. You should use DIS when you want to build integrations using Azure Service Bus.
