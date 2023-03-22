@@ -1,0 +1,65 @@
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  BuildConfiguration: 'release'
+  
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+stages:
+- stage: Build
+  displayName: 'Build'
+  condition: eq(variables['Build.Reason'], 'PullRequest')
+
+  jobs:
+
+  - job: Build
+    displayName: 'Build'
+
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core SDK 6.x'
+      inputs:
+        version: 6.x
+
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet restore'
+      inputs:
+        command: restore
+        projects: |
+          src/**/BH.DIS.csproj      
+          src/**/BH.DIS.Core.csproj
+          src/**/BH.DIS.EventPublisher.csproj
+          src/**/BH.DIS.Manager.csproj
+          src/**/BH.DIS.MessageStore.csproj
+          src/**/BH.DIS.Resolver.csproj
+          src/**/BH.DIS.SDK.csproj
+          src/**/BH.DIS.ServiceBus.csproj
+          src/**/BH.DIS.CosmosSubscriber.csproj
+          src/**/BH.DIS.Management.ServiceBus.csproj
+        feedsToUse: 'select'
+        vstsFeed: 'ff2a2b3c-d6ca-469d-a814-5b7967fe65ab/1c968a81-ae59-436f-85b5-6c736b92e2d0'
+        includeNuGetOrg: true
+
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet build'
+      inputs:
+        command: build
+        projects: |
+          src/**/BH.DIS.csproj      
+          src/**/BH.DIS.Core.csproj
+          src/**/BH.DIS.EventPublisher.csproj
+          src/**/BH.DIS.Manager.csproj
+          src/**/BH.DIS.MessageStore.csproj
+          src/**/BH.DIS.Resolver.csproj
+          src/**/BH.DIS.SDK.csproj
+          src/**/BH.DIS.ServiceBus.csproj
+          src/**/BH.DIS.Management.ServiceBus.csproj
+        arguments: '--no-restore --configuration $(BuildConfiguration)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet test (all in /tests)'
+      inputs:
+        command: test
+        projects: 'tests/**/*.csproj'
+        arguments: '--no-build --configuration $(BuildConfiguration)'

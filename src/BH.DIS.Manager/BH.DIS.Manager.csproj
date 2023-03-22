@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.44.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BH.DIS.MessageStore\BH.DIS.MessageStore.csproj" />
+    <ProjectReference Include="..\BH.DIS.ServiceBus\BH.DIS.ServiceBus.csproj" />
+  </ItemGroup>
+
+</Project>

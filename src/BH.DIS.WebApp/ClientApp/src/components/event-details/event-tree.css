@@ -1,0 +1,33 @@
+.node__root__produce > circle {
+    fill: #1F11B1;
+    r:30;
+  }
+  
+  .node__branch__produce > circle {
+    fill: #2F2782;
+    r:25
+
+  }
+  
+  .node__leaf__produce > circle {
+    fill: #7670B8;
+    /* Let's also make the radius of leaf nodes larger */
+    r: 20;
+  }
+
+  .node__root__consume > circle {
+    fill: #A71835;
+    r:30;
+  }
+  
+  .node__branch__consume > circle {
+    fill: #823E4C;
+    r:25
+
+  }
+  
+  .node__leaf__consume > circle {
+    fill: #C0919B;
+    /* Let's also make the radius of leaf nodes larger */
+    r: 20;
+  }

@@ -1,0 +1,79 @@
+trigger:
+  batch: true
+  branches: 
+    include:
+    - main
+    - development
+  paths:
+    exclude: [ 'src/BH.DIS.WebApp/*' ] # file paths which must match to trigger a build
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- name: BuildConfiguration
+  value: 'release'
+
+stages:
+  - stage: Build_Application
+    displayName: Build & Test
+    jobs:
+    - template: build-core-template.yml
+      parameters:
+        vstsFeed: 'ff2a2b3c-d6ca-469d-a814-5b7967fe65ab/1c968a81-ae59-436f-85b5-6c736b92e2d0'
+
+  - stage: Deploy_Dev
+    displayName: Deploy to Dev
+    dependsOn: Build_Application
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
+    variables:
+      - group: 'DIS-Dev'
+    jobs:
+      - template: deploy-core-template.yml
+        parameters:
+          environment: dev
+          serviceConnectionName: 'DIS'
+          deployWorkloadTest: false
+          deployCleanUp: false
+          
+  # - stage: Deploy_Test
+  #   displayName: Deploy to Test
+  #   dependsOn: Build_Application
+  #   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #   variables:
+  #     - group: 'DIS-Test'
+  #   jobs:
+  #   - template: deploy-core-template.yml
+  #     parameters:
+  #       environment: test
+  #       serviceConnectionName: 'DIS'
+  #       deployWorkloadTest: false
+  #       deployCleanUp: false
+
+  # - stage: Deploy_UAT
+  #   displayName: Deploy to UAT
+  #   dependsOn: Deploy_Test
+  #   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #   variables:
+  #     - group: 'DIS-UAT'
+  #   jobs:
+  #   - template: deploy-core-template.yml
+  #     parameters:
+  #       environment: uat
+  #       serviceConnectionName: 'DIS'
+  #       deployWorkloadTest: false
+  #       deployCleanUp: false
+
+  # - stage: Deploy_Production
+  #   displayName: Deploy to Production
+  #   dependsOn: Build_Application
+  #   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))
+  #   variables:
+  #     - group: 'DIS-Prod'
+  #   jobs:
+  #   - template: deploy-core-template.yml
+  #     parameters:
+  #       environment: prod
+  #       serviceConnectionName: DIS
+  #       deployWorkloadTest: false
+  #       deployCleanUp: false

@@ -1,0 +1,85 @@
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  BuildConfiguration: 'release'
+
+stages:
+  - stage: Publish_files
+    displayName: Publish files
+    jobs:
+      - job: 
+        steps:
+           - task: DotNetCoreCLI@2
+             displayName: 'dotnet publish (BH.DIS.Core.dll for resource deployment)'
+             inputs:
+              command: publish
+              nobuild: true
+              publishWebProjects: false
+              projects: 'src/**/BH.DIS.Core.csproj'
+              zipAfterPublish: false
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/deploy --framework netstandard2.0'
+
+           - task: CopyFiles@2
+             displayName: 'Copy deployment files'
+             inputs:
+               SourceFolder: 'deploy'
+               contents: |
+                 **/*
+               TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
+
+           - task: PublishBuildArtifacts@1
+             displayName: 'Publish Artifact'
+             inputs:
+               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+               ArtifactName: 'drop'
+
+  - stage: Provision_Dev
+    displayName: Provision Dev
+    dependsOn: Publish_files
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
+    variables: 
+      - group: DIS-Dev
+    jobs: 
+      - template: infra-core-template.yml
+        parameters:
+          environment: dev
+          serviceConnectionName: 'DIS'
+  
+  # - stage: Provision_Test
+  #   displayName: Provision Test
+  #   dependsOn: Publish_files
+  #   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #   variables: 
+  #     - group: DIS-Test
+  #   jobs: 
+  #     - template: infra-core-template.yml
+  #       parameters:
+  #         environment: test
+  #         serviceConnectionName: 'DIS'
+      
+  # - stage: Provision_UAT
+  #   displayName: Provision UAT
+  #   dependsOn: Provision_Test
+  #   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #   variables: 
+  #     - group: DIS-UAT
+  #   jobs: 
+  #     - template: infra-core-template.yml
+  #       parameters:
+  #         environment: uat
+  #         serviceConnectionName: 'DIS'
+      
+  # - stage: Provision_Production
+  #   displayName: Provision Prod
+  #   dependsOn: Provision_UAT
+  #   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #   variables: 
+  #     - group: 'DIS-Prod'
+  #   jobs: 
+  #     - template: infra-core-template.yml
+  #       parameters:
+  #         environment: prod
+  #         serviceConnectionName: 'DIS'

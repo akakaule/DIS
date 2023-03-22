@@ -1,0 +1,24 @@
+trigger:
+  batch: true
+  branches: 
+    include:
+    - main
+  paths:
+    include: [ 'src/BH.DIS.SDK/*' ] # file paths which must match to trigger a build
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- name: BuildConfiguration
+  value: 'release'
+
+stages:
+  - stage: Build_Application
+    displayName: Build & Test
+    jobs:
+    - template: build-sdk-template.yml
+      parameters:
+        vstsFeed: 'ff2a2b3c-d6ca-469d-a814-5b7967fe65ab/1c968a81-ae59-436f-85b5-6c736b92e2d0'
+
+

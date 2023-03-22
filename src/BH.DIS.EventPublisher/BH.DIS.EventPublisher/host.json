@@ -1,0 +1,13 @@
+﻿{
+  "version": "2.0",
+  "extensions": {
+    "serviceBus": {
+      "SessionHandlerOptions": {
+        "MaxAutoRenewDuration": "00:05:00",
+        "MessageWaitTimeout": "00:00:10",
+        "AutoComplete": false,
+        "MaxConcurrentSessions": 1
+      }
+    }
+  }
+}

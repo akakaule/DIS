@@ -1,0 +1,1 @@
+dotnet BH.DIS.Workload.ConsoleApp.dll %*

@@ -1,0 +1,9 @@
+﻿{
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "AzureWebJobsServiceBus": "Endpoint=sb://sb-bhdis-sbdev.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=W+/dRzwa/eyE73vjGzYtG/pa9mLL0/Y0E//LPxYeIBE=",
+    "BobId": "bob",
+    "CharlieId": "charlie"
+  }
+}

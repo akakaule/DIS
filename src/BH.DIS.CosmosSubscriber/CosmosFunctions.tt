@@ -1,0 +1,120 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="netstandard" #>
+<#@ assembly name="$(TargetDir)bin\BH.DIS.dll" #>
+<#@ assembly name="$(TargetDir)bin\BH.DIS.Core.dll" #>
+<#@ assembly name="$(TargetDir)bin\BH.DIS.MessageStore.dll" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="BH.DIS" #>
+<#@ import namespace="BH.DIS.Core" #>
+<#@ import namespace="BH.DIS.Core.Endpoints" #>
+<#@ import namespace="BH.DIS.MessageStore" #>
+<#@ output extension=".cs" #>
+<#
+    //Iterate endpoints here
+    var platform = new PlatformConfiguration();
+    
+    string[] endpoints = platform.Endpoints.Select(x=> x.Id).ToArray();
+
+#>
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Documents;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Azure.Messaging.EventGrid;
+using Azure;
+using BH.DIS.MessageStore;
+
+
+namespace BH.DIS.CosmosSubscriber
+{
+    //Generated file modify in .tt
+
+	public class CosmosFunction
+    {
+        private const string DatabaseName = "MessageDatabase";
+        private readonly HttpClient client;
+
+        public CosmosFunction(HttpClient httpClient)
+        {
+            this.client = httpClient;
+        }
+
+<#
+foreach (var endpoint in endpoints)
+{
+#>
+        [FunctionName("<#= endpoint #>")]
+        public async Task Run<#= endpoint #>([CosmosDBTrigger(
+            databaseName: DatabaseName,
+            collectionName: "<#= endpoint #>",
+            ConnectionStringSetting = "CosmosDBConnection",
+            LeaseCollectionName = "leases",
+            CreateLeaseCollectionIfNotExists = true
+            )]IReadOnlyList<Document> input, ILogger log)
+        {
+            log.LogDebug($"CosmosSubscriber triggered on <#= endpoint #>");
+            HandleInput(input, "<#= endpoint #>", log);
+        }
+
+<#
+}
+#>
+
+        private async Task HandleInput(IReadOnlyList<Document> input, string endpoint, ILogger log)
+        {
+            if (input != null && input.Count > 0)
+            {
+                PublishToStoragehook(endpoint, log);
+                PostToEventgrid(input, endpoint);
+            }
+        }
+
+        private async Task PublishToStoragehook(string endpoint, ILogger log)
+        {
+            var baseUrl = Environment.GetEnvironmentVariable("StoragehookUrl");
+            var url = $"{baseUrl}{endpoint}";
+
+            try
+            {
+                var response = await client.PostAsync(url, null);
+            }
+            catch (Exception e)
+            {
+                log.LogError(e, $"Failed posting to {url}");
+                throw;
+            }
+        }
+
+        private async Task PostToEventgrid(IReadOnlyList<Document> input, string endpoint)
+        {
+            var eventDoc = input[0];            
+            if(eventDoc == null) return;
+
+            var status = eventDoc.GetPropertyValue<string>("status");
+            if (status != "Failed") return;
+
+            var endpointUri = Environment.GetEnvironmentVariable("eventGridUrl");
+            var accessKey = Environment.GetEnvironmentVariable("evenGridKey");
+
+            EventGridPublisherClient client = new EventGridPublisherClient(
+                new Uri(endpointUri),
+                new AzureKeyCredential(accessKey));
+
+            EventGridEvent egEvent = new EventGridEvent(endpoint,eventDoc.GetPropertyValue<string>("eventType") ,"1.0", eventDoc.GetPropertyValue<string>("id"));
+
+            //Send event
+            await client.SendEventAsync(egEvent);
+        }
+    } 
+}

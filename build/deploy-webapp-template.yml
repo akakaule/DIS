@@ -1,0 +1,36 @@
+parameters:
+  environment:
+  serviceConnectionName:
+
+jobs:
+- deployment: Deploy_Webapp
+  environment: DIS-${{parameters.environment}}
+  displayName: Deploy webapp
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: AzureWebApp@1
+          displayName: 'Deploy'
+          inputs:
+            azureSubscription: ${{parameters.serviceConnectionName}}
+            appType: webApp
+            appName: 'webapp-$(SolutionResourceId)-$(EnvironmentName)-management-$(ResourceNamePostfix)'
+            package: '$(Pipeline.Workspace)/drop/publish/BH.DIS.WebApp.zip'
+            appSettings: '-AzureAd:CallbackPath $(CallbackPath) -AzureAd:Domain $(Domain) -AzureAd:Instance $(Instance) -AzureAd:ClientId $(ClientId) -AzureAd:TenantId $(TenantId) -ServiceBusManagement:TenantId $(TenantId) -ServiceBusManagement:SubscriptionId $(SubscriptionId) -ServiceBusManagement:ResourceGroupName $(ResourceGroupName) -ServiceBusManagement:NamespaceName $(ServiceBusNamespaceName) -ServiceBusManagement:ClientId $(ClientId) -ServiceBusManagement:ClientSecret $(ClientSecret)'
+
+- deployment: Deploy_Alerts
+  environment: DIS-${{parameters.environment}}
+  displayName: Deploy Subscription
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: AzureFunctionApp@1
+          displayName: 'Deploy'
+          inputs:
+            azureSubscription: ${{parameters.serviceConnectionName}}
+            appType: functionApp
+            appName: 'func-$(SolutionResourceId)-$(EnvironmentName)-alerts-$(ResourceNamePostfix)'
+            package: '$(Pipeline.Workspace)/drop/publish/BH.DIS.Alerts.zip'
+            appSettings: '-sendGridApiKey "$(SendGridAPIKey)" -sendGridEmail "$(SendGridEmail)" -sendGridUseTemplateBool "$(SendGridUseTemplateBool)" -sendGridTemplateId "$(SendGridTemplateId)"'

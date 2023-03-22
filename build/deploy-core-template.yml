@@ -1,0 +1,66 @@
+parameters:
+  environment:
+  serviceConnectionName:
+  deployWorkloadTest:
+
+jobs:
+- deployment: Deploy_EventPubliser
+  environment: DIS-${{parameters.environment}}
+  displayName: Deploy Event publisher
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: AzureFunctionApp@1
+          displayName: 'Deploy'
+          inputs:
+            azureSubscription: ${{parameters.serviceConnectionName}}
+            appType: functionApp
+            appName: 'func-$(SolutionResourceId)-$(EnvironmentName)-event-$(ResourceNamePostfix)'
+            package: '$(Pipeline.Workspace)/drop/publish/BH.DIS.EventPublisher.zip'
+            appSettings: '-NugetVersion "$(Build.BuildNumber)"'
+
+- deployment: Deploy_Resolver
+  environment: DIS-${{parameters.environment}}
+  displayName: Deploy Resolver
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: AzureFunctionApp@1
+          displayName: 'Deploy'
+          inputs:
+            azureSubscription: ${{parameters.serviceConnectionName}}
+            appType: functionApp
+            appName: 'func-$(SolutionResourceId)-$(EnvironmentName)-resolver-$(ResourceNamePostfix)'
+            package: '$(Pipeline.Workspace)/drop/publish/BH.DIS.Resolver.zip'
+
+- deployment: Deploy_CosmosSubscriber
+  environment: DIS-${{parameters.environment}}
+  displayName: Deploy CosmosSubscriber
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: AzureFunctionApp@1
+          displayName: 'Deploy'
+          inputs:
+            azureSubscription: ${{parameters.serviceConnectionName}}
+            appType: functionApp
+            appName: 'func-$(SolutionResourceId)-$(EnvironmentName)-cosmos-$(ResourceNamePostfix)'
+            package: '$(Pipeline.Workspace)/drop/publish/BH.DIS.CosmosSubscriber.zip'
+
+- deployment: Deploy_Heartbeat
+  environment: DIS-${{parameters.environment}}
+  displayName: Deploy Heartbeat
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: AzureFunctionApp@1
+          displayName: 'Deploy'
+          inputs:
+            azureSubscription: ${{parameters.serviceConnectionName}}
+            appType: functionApp
+            appName: 'func-$(SolutionResourceId)-$(EnvironmentName)-heartbeat-$(ResourceNamePostfix)'
+            package: '$(Pipeline.Workspace)/drop/publish/BH.DIS.Heartbeat.zip'
