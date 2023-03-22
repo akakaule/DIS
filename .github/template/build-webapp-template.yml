@@ -1,0 +1,48 @@
+#Error (line 29): the step 'PublishTestResults@2' does not have a conversion path yet
+env:
+  environment: ""
+jobs:
+  Build_Publish:
+    name: Build and publish
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use .NET Core SDK 6.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.x
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: dotnet restore
+        run: |
+          dotnet restore src/**/BH.DIS.WebApp.csproj --configuration ${{ env.BuildConfiguration }} /p:ASPNETCORE_ENVIRONMENT=${{ env.environment }} 
+          dotnet restore src/**/BH.DIS.Alerts.csproj --configuration ${{ env.BuildConfiguration }} /p:ASPNETCORE_ENVIRONMENT=${{ env.environment }}
+      - name: Npm install
+        run: npm install src/BH.DIS.WebApp/ClientApp
+      - name: dotnet build
+        run: |
+          dotnet build src/**/BH.DIS.WebApp.csproj --no-restore --configuration ${{ env.BuildConfiguration }} /p:ASPNETCORE_ENVIRONMENT=${{ env.environment }} 
+          dotnet build src/**/BH.DIS.Alerts.csproj --no-restore --configuration ${{ env.BuildConfiguration }} /p:ASPNETCORE_ENVIRONMENT=${{ env.environment }}
+      - name: Npm test
+        run: npm run test:ci src/BH.DIS.WebApp/ClientApp
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            src/BH.DIS.WebApp/ClientApp/junit.xml
+      - name: dotnet publish (webapp + Subscription)
+        run: |
+          dotnet publish src/**/BH.DIS.WebApp.csproj --configuration ${{ env.BuildConfiguration }} --output ${{ github.workspace }}/publish /p:InformationalVersion=${{ env.PackageVersion }} --no-restore /p:ASPNETCORE_ENVIRONMENT=${{ env.environment }} 
+          dotnet publish src/**/BH.DIS.Alerts.csproj --configuration ${{ env.BuildConfiguration }} --output ${{ github.workspace }}/publish /p:InformationalVersion=${{ env.PackageVersion }} --no-restore /p:ASPNETCORE_ENVIRONMENT=${{ env.environment }}
+      - name: Copy deployment files
+        run: |
+          Copy 'deploy/**/*
+          ' '${{ github.workspace }}/deploy'
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ github.workspace }}
+          name: drop
