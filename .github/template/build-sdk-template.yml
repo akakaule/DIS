@@ -1,0 +1,61 @@
+jobs:
+  Build:
+    name: Build Application
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use .Net Core sdk 6.0.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.x
+      - name: dotnet restore
+        run: |
+          dotnet restore src/**/BH.DIS.Core.csproj 
+          dotnet restore src/**/BH.DIS.SDK.csproj 
+          dotnet restore src/**/BH.DIS.ServiceBus.csproj
+      - name: dotnet build
+        run: |
+          dotnet build src/**/BH.DIS.Core.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.SDK.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.ServiceBus.csproj --no-restore --configuration ${{ env.BuildConfiguration }}
+      - name: dotnet test (all in /tests)
+        run: dotnet test tests/**/*.csproj --no-build --configuration ${{ env.BuildConfiguration }}
+  Publish:
+    name: Publish to nuget and artifacts
+    needs:
+      - Build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.11
+        with:
+          versionSpec: 5.x
+      - name: GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.11
+        with:
+          versionSpec: 5.x
+      - name: Execute GitVersion
+        uses: gittools/actions/gitversion/execute@v0.9.11
+        with:
+          useConfigFile: true
+          configFilePath: build/gitversion.yml
+      - name: Use .Net Core sdk 6.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.x
+      - name: dotnet restore
+        run: |
+          dotnet restore src/**/BH.DIS.Core.csproj 
+          dotnet restore src/**/BH.DIS.SDK.csproj 
+          dotnet restore src/**/BH.DIS.ServiceBus.csproj
+      - name: dotnet build
+        run: |
+          dotnet build src/**/BH.DIS.Core.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.SDK.csproj --no-restore --configuration ${{ env.BuildConfiguration }} 
+          dotnet build src/**/BH.DIS.ServiceBus.csproj --no-restore --configuration ${{ env.BuildConfiguration }}
+      - name: dotnet pack
+        run: dotnet pack */**/BH.DIS.SDK.csproj; */**/BH.DIS.Core.csproj; */**/BH.DIS.ServiceBus.csproj --no-restore --configuration ${{ env.BuildConfiguration }} /p:InformationalVersion=${{ env.FullSemVer }} /p:AssemblyVersion=${{ env.FullSemVer }} /p:FileVersion=${{ env.FullSemVer }} /p:Version=${{ env.FullSemVer }}
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ github.workspace }}
+          name: drop
