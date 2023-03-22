@@ -1,0 +1,41 @@
+parameters:
+  environment:
+  serviceConnectionName:
+  deployRoleAssignments:
+
+jobs:
+- deployment: Deploy_Core
+  environment: DIS-core-${{parameters.environment}}
+  displayName: Deploy core
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - download: current
+          artifact: drop
+          displayName: Download artifacts
+        - task: AzureCLI@2
+          displayName: 'Azure CLI: deploy-servicebus-topology.ps1'
+          inputs:
+            azureSubscription: ${{parameters.serviceConnectionName}}
+            scriptType: pscore
+            scriptPath: '$(Pipeline.Workspace)/drop/deploy/deploy-servicebus-topology.ps1'
+            arguments: '-solutionId "$(SolutionResourceId)" -environment "$(EnvironmentName)" -resourceGroupName "$(ResourceGroupName)"'
+            workingDirectory: '$(Pipeline.Workspace)/drop/deploy'
+- deployment: Deploy_RoleAssignments
+  environment: DIS-core-${{parameters.environment}}
+  dependsOn: Deploy_Core
+  displayName: Deploy roleassignments
+  condition: and(succeeded(), eq('${{parameters.deployRoleAssignments}}', true))
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: AzureCLI@2
+          displayName: 'Azure CLI: deploy.roleassignments.ps1'
+          inputs:
+            azureSubscription: ${{parameters.serviceConnectionName}}
+            scriptType: pscore
+            scriptPath: '$(Pipeline.Workspace)/drop/deploy/deploy.roleassignments.ps1'
+            arguments: '-solutionId "$(SolutionResourceId)" -environment "$(EnvironmentName)" -resourceGroupName "$(ResourceGroupName)"'
+            workingDirectory: '$(Pipeline.Workspace)/drop/deploy'

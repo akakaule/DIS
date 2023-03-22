@@ -1,0 +1,56 @@
+jobs:
+- job: Build
+  displayName: Build Application
+  steps:
+  - task: UseDotNet@2
+    displayName: 'Use .Net Core sdk 3.1.x'
+    inputs:
+      version: 3.1.x
+  - task: UseDotNet@2
+    displayName: 'Use .Net60'
+    inputs:
+      version: 6.x
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet restore'
+    inputs:
+      command: restore
+      projects: |
+        */**/BH.DIS.csproj
+      feedsToUse: 'select'
+      vstsFeed: 'ff2a2b3c-d6ca-469d-a814-5b7967fe65ab/1c968a81-ae59-436f-85b5-6c736b92e2d0'
+      includeNuGetOrg: true
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build'
+    inputs:
+      command: build
+      projects: |
+        */**/BH.DIS.csproj
+      feedsToUse: 'select'
+      vstsFeed: 'ff2a2b3c-d6ca-469d-a814-5b7967fe65ab/1c968a81-ae59-436f-85b5-6c736b92e2d0'
+      includeNuGetOrg: true
+      arguments: '--no-restore --configuration $(BuildConfiguration)'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet publish (BH.DIS.dll for resource deployment)'
+    inputs:
+      command: publish
+      nobuild: true
+      publishWebProjects: false
+      projects: '*/**/BH.DIS.csproj'
+      zipAfterPublish: false
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/deploy --framework netstandard2.0'
+
+  - task: CopyFiles@2
+    displayName: 'Copy deployment files'
+    inputs:
+      SourceFolder: 'deploy'
+      contents: |
+        **/*
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
