@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BH.DIS.MessageStore", "BH.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BH.DIS.Management.ServiceBus", "BH.DIS.Management.ServiceBus\BH.DIS.Management.ServiceBus.csproj", "{2ECB3B7F-1C1B-489C-A92D-F2EA0C17941B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BH.DIS", "BH.DIS.Configuration\BH.DIS.csproj", "{F5BA2207-95FD-4E60-8C2D-8B82FDD80C92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{2ECB3B7F-1C1B-489C-A92D-F2EA0C17941B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2ECB3B7F-1C1B-489C-A92D-F2EA0C17941B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2ECB3B7F-1C1B-489C-A92D-F2EA0C17941B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5BA2207-95FD-4E60-8C2D-8B82FDD80C92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5BA2207-95FD-4E60-8C2D-8B82FDD80C92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5BA2207-95FD-4E60-8C2D-8B82FDD80C92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5BA2207-95FD-4E60-8C2D-8B82FDD80C92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

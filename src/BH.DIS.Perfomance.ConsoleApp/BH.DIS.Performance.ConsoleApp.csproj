@@ -10,10 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\samples\BH.DIS.Samples\BH.DIS.Samples.csproj" />
     <ProjectReference Include="..\BH.DIS.SDK\BH.DIS.SDK.csproj" />
     <ProjectReference Include="..\BH.DIS.Workload.ConsoleApp\BH.DIS.Workload.ConsoleApp.csproj" />
-	<PackageReference Include="BH.DIS;" Version="1.*" />
   </ItemGroup>
 
 </Project>
